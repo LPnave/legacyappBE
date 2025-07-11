@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PM
+  Developer
+}
+
+enum ProjectStatus {
+  Working
+  Review
+  Ready
+}
+
+model User {
+  UserID       String    @id @default(uuid())
+  Email        String    @unique
+  PasswordHash String
+  Name         String?
+  Role         Role
+  CreatedAt    DateTime  @default(now())
+  UpdatedAt    DateTime  @updatedAt
+  Projects     Project[] @relation("CreatedProjects")
+  Comments     Comment[]
+  Assignments  ProjectAssignment[]
+}
+
+model Project {
+  ProjectID    String              @id @default(uuid())
+  Title        String
+  Description  String?
+  Status       ProjectStatus
+  CreatedBy    User                @relation("CreatedProjects", fields: [CreatedByID], references: [UserID])
+  CreatedByID  String
+  CreatedAt    DateTime            @default(now())
+  UpdatedAt    DateTime            @updatedAt
+  Pages        Page[]
+  PDFReports   PDFReport[]
+  Assignments  ProjectAssignment[]
+}
+
+model ProjectAssignment {
+  AssignmentID String   @id @default(uuid())
+  Project      Project  @relation(fields: [ProjectID], references: [ProjectID])
+  ProjectID    String
+  User         User     @relation(fields: [UserID], references: [UserID])
+  UserID       String
+  AssignedAt   DateTime @default(now())
+}
+
+model Page {
+  PageID         String      @id @default(uuid())
+  Project        Project     @relation(fields: [ProjectID], references: [ProjectID])
+  ProjectID      String
+  Title          String?
+  ScreenshotPath String
+  Order          Int
+  PositionX      Float?
+  PositionY      Float?
+  CreatedAt      DateTime    @default(now())
+  UpdatedAt      DateTime    @updatedAt
+  WorkflowsFrom  Workflow[]  @relation("FromPage")
+  WorkflowsTo    Workflow[]  @relation("ToPage")
+  Comments       Comment[]
+}
+
+model Workflow {
+  WorkflowID String   @id @default(uuid())
+  FromPage   Page     @relation("FromPage", fields: [FromPageID], references: [PageID])
+  FromPageID String
+  ToPage     Page     @relation("ToPage", fields: [ToPageID], references: [PageID])
+  ToPageID   String
+  Label      String?
+  CreatedAt  DateTime @default(now())
+}
+
+model Comment {
+  CommentID String   @id @default(uuid())
+  Page      Page     @relation(fields: [PageID], references: [PageID])
+  PageID    String
+  User      User     @relation(fields: [UserID], references: [UserID])
+  UserID    String
+  Content   String
+  CreatedAt DateTime @default(now())
+}
+
+model PDFReport {
+  ReportID    String   @id @default(uuid())
+  Project     Project  @relation(fields: [ProjectID], references: [ProjectID])
+  ProjectID   String
+  GeneratedAt DateTime @default(now())
+  FilePath    String
+}
