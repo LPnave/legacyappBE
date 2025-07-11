@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { PDFReportRepository } from '../../../src/infrastructure/repositories/PDFReportRepository';
 import { PDFReportUseCases } from '../../../src/application/usecases/PDFReportUseCases';
 import { withAuth } from '../_middleware/auth';
+import { withCORS } from '../../../src/api/_middleware/cors';
 
 /**
  * @swagger
@@ -48,7 +49,7 @@ import { withAuth } from '../_middleware/auth';
  *       204:
  *         description: Report deleted
  */
-export default withAuth(handler);
+export default withCORS(withAuth(handler));
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const reportRepo = new PDFReportRepository();

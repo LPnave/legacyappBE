@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { PDFReportRepository } from '../../../src/infrastructure/repositories/PDFReportRepository';
 import { PDFReportUseCases } from '../../../src/application/usecases/PDFReportUseCases';
 import { withAuth } from '../_middleware/auth';
+import { withCORS } from '../../../src/api/_middleware/cors';
 
 const schema = z.object({
   projectId: z.string().uuid(),
@@ -64,7 +65,7 @@ const schema = z.object({
  *                 report:
  *                   $ref: '#/components/schemas/PDFReport'
  */
-export default withAuth(handler);
+export default withCORS(withAuth(handler));
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const reportRepo = new PDFReportRepository();
