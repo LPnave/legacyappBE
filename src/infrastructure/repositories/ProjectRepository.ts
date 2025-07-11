@@ -29,7 +29,7 @@ export class ProjectRepository {
   async findById(projectId: string): Promise<Project | null> {
     const found = await prisma.project.findUnique({
       where: { ProjectID: projectId },
-      include: { CreatedBy: true },
+      include: { CreatedBy: true, _count: { select: { Pages: true } } },
     });
     if (!found) return null;
     return {
@@ -41,11 +41,12 @@ export class ProjectRepository {
       CreatedByName: found.CreatedBy?.Name ?? '',
       CreatedAt: found.CreatedAt,
       UpdatedAt: found.UpdatedAt,
+      pagesCount: found._count?.Pages ?? 0,
     };
   }
 
   async findAll(): Promise<Project[]> {
-    const projects = await prisma.project.findMany({ include: { CreatedBy: true } });
+    const projects = await prisma.project.findMany({ include: { CreatedBy: true, _count: { select: { Pages: true } } } });
     return projects.map((p) => ({
       ProjectID: p.ProjectID,
       Title: p.Title,
@@ -55,6 +56,7 @@ export class ProjectRepository {
       CreatedByName: p.CreatedBy?.Name ?? '',
       CreatedAt: p.CreatedAt,
       UpdatedAt: p.UpdatedAt,
+      pagesCount: p._count?.Pages ?? 0,
     }));
   }
 

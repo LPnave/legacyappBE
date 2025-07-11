@@ -10,4 +10,5 @@ export interface Project {
   CreatedByName?: string;
   CreatedAt: Date;
   UpdatedAt: Date;
+  pagesCount?: number;
 } 
